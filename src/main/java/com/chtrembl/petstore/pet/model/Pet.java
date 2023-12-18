@@ -1,19 +1,19 @@
 package com.chtrembl.petstore.pet.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import org.springframework.validation.annotation.Validated;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Pet
@@ -21,11 +21,18 @@ import io.swagger.annotations.ApiModelProperty;
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-20T15:31:39.272-05:00")
 
+@Entity
+@Table(name = "[pet]", schema = "public")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Pet {
 	@JsonProperty("id")
+	@Id
 	private Long id;
 
 	@JsonProperty("category")
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = false)
 	private Category category;
 
 	@JsonProperty("name")
@@ -37,6 +44,9 @@ public class Pet {
 
 	@JsonProperty("tags")
 	@Valid
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "pet_tag", joinColumns = @JoinColumn(name = "pet_id"),
+			inverseJoinColumns = @JoinColumn(name = "tag_id"))
 	private List<Tag> tags = null;
 
 	/**
@@ -77,6 +87,7 @@ public class Pet {
 	}
 
 	@JsonProperty("status")
+	@Convert(converter = StatusEnumConverter.class)
 	private StatusEnum status;
 
 	public Pet id(Long id) {
